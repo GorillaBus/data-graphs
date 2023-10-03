@@ -1,0 +1,51 @@
+{
+  "name": "web-client",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "resolutions": {
+    "v8-to-istanbul": "9.1.0"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.6",
+    "@types/react-dom": "^18.2.8",
+    "@types/react-leaflet": "^3.0.0"
+  },
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@turf/turf": "^6.5.0",
+    "@types/react-router-dom": "^5.3.3",
+    "leaflet": "^1.9.4",
+    "leaflet-color-markers": "^0.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-leaflet": "^4.2.1",
+    "react-router-dom": "^6.16.0",
+    "react-scripts": "5.0.1"
+  }
+}
