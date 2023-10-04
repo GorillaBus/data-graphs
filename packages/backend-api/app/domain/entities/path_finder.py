@@ -3,16 +3,16 @@ from geopy.distance import geodesic
 from shapely.geometry import Point
 from shapely.ops import unary_union
 from typing import Tuple, Dict, List
+from app.infrastructure.dto.node_dto import NodeDTO
 
-
-MAX_DISTANCE = 1000
+MAX_DISTANCE = 1200
 
 
 class PathFinder:
     def __init__(self, geo_repo: IGeoRepository):
         self.geo_repo = geo_repo
 
-    def find_path(self, point_a: Tuple[float, float], point_b: Tuple[float, float]) -> Dict[str, List[Tuple[float, float]]]:
+    def find_path(self, point_a: Tuple[float, float], point_b: Tuple[float, float]) -> List[NodeDTO]:
         # A-B distance
         distance = geodesic(point_a, point_b).meters
         if distance > MAX_DISTANCE:
@@ -30,9 +30,4 @@ class PathFinder:
         buffer_centroid = united_buffer.centroid.coords[0]
 
         # Get features
-        features = self.geo_repo.find_ways_in_radius(
-            buffer_centroid, buffer_radius)
-
-        return {
-            "path": []
-        }
+        return self.geo_repo.find_ways_in_radius(buffer_centroid, buffer_radius)

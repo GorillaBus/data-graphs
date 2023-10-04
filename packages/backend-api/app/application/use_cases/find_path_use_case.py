@@ -1,5 +1,5 @@
 from app.domain.entities.path_finder import PathFinder
-from typing import Dict, Tuple
+from typing import Dict
 
 
 class FindPathUseCase:
