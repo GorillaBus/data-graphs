@@ -1,10 +1,11 @@
 #!/bin/bash
 
-# Activa tu entorno virtual
+# Prepare virtual env
 source venv/bin/activate
+export PYTHONPATH=$(pwd):$PYTHONPATH
 
-# Ejecuta los tests
-pytest --color=yes --verbose --cov=app --cov-report=term-missing -n 4
+# Run tests 
+pytest --color=yes --verbose --cov=app --cov-report=term-missing
 
 # Desactiva el entorno virtual al finalizar
 deactivate
