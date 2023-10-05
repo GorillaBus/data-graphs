@@ -53,6 +53,7 @@ fedora-third-party==0.10
 file-magic==0.4.0
 filelock==3.12.4
 Flask==3.0.0
+Flask-Cors==4.0.0
 folium==0.14.0
 fonttools==4.43.0
 fqdn==1.5.1
