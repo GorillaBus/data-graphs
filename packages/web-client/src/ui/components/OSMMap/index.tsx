@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer, Circle } from "react-leaflet";
-import * as turf from '@turf/turf';
+import React, { useRef, useState, useEffect } from "react";
+import { MapContainer, Marker, Popup, TileLayer, GeoJSON, Polyline } from "react-leaflet";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './style.css';
@@ -17,48 +16,80 @@ const defaultPosition = {
   zoom: 13
 };
 
-const markerA: [number, number] = [35.745, 51.430];
-const markerB: [number, number] = [35.735, 51.440];
+type MarkerData = {
+  position: [number, number],
+  label: string,
+}
+const markersData: MarkerData[] = [
+  { position: [35.745, 51.430], label: 'A' },
+  { position: [35.735, 51.440], label: 'B' }
+];
 
-export const OSMMap = () => {
-  const pointA = turf.point(markerA);
-  const pointB = turf.point(markerB);
-  const distance = turf.distance(pointA, pointB) * 1000; // Convertido a metros
-  
-  const midpoint = turf.midpoint(pointA, pointB);
-  const circleCenter = midpoint.geometry.coordinates as [number, number];
-  const circleRadius = distance * 2;
+export const OSMMap: React.FC = () => {
+  const markersRef = useRef<{[key: string]: any}>({});
+  const [path, setPath] = useState([]);
+  const [routeFeatures, setRouteFeatures] = useState<any>(null);
+  const [markersReady, setMarkersReady] = useState<boolean>(false);
 
-  console.log("circleRadius", circleRadius)
+  const fetchRoute = async () => {
+    const markerA = markersRef.current['A'].getLatLng();
+    const markerB = markersRef.current['B'].getLatLng();
 
-  console.log("circleCenter", circleCenter)
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/api/find-path/${markerA.lat}/${markerA.lng}/${markerB.lat}/${markerB.lng}`);
+      const data = await response.json();
+      setPath(data.path);
 
+    } catch (error) {
+      console.error("Error fetching the route data:", error);
+    }
+  };
 
-  const position: [number, number] = [defaultPosition.lat, defaultPosition.lng];
+  const handleDragEnd = async (label: string) => {
+    const latLng = markersRef.current[label].getLatLng();
+    console.log(`Latitud ${label}: ${latLng.lat}, Longitud ${label}: ${latLng.lng}`);
+    await fetchRoute();
+  };
 
-  const [loc, setLoc] = useState<[number, number]>([
-    defaultPosition.lat,
-    defaultPosition.lng
-  ]);
+  useEffect(() => {
+    if (markersReady) {
+      fetchRoute();
+    }
+  }, [markersReady]);
+
+  const handleMarkerRef = (label: string, ref: any) => {
+    markersRef.current[label] = ref;
+    if (markersRef.current.A && markersRef.current.B) {
+      setMarkersReady(true);
+    }
+  }
+
   return (
     <div>
-        <MapContainer className="map" center={loc} zoom={defaultPosition.zoom}>
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-          <Marker position={markerA}>
-            <Popup>
-              This is position A
-            </Popup>
+      <MapContainer className="map" center={defaultPosition} zoom={defaultPosition.zoom}>
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        {markersData.map(marker => (
+          <Marker
+            key={marker.label}
+            ref={ref => handleMarkerRef(marker.label, ref)}
+            position={marker.position}
+            draggable={true}
+            eventHandlers={{ dragend: () => handleDragEnd(marker.label) }}>
+            <Popup>This is position {marker.label}</Popup>
           </Marker>
-
-          <Marker position={markerB}>
-            <Popup>
-              This is position B
-            </Popup>
-          </Marker>
-          <Circle center={circleCenter} radius={circleRadius} />
-        </MapContainer>
-    </div>);
+        ))}
+        {
+            path.length > 0 && (
+                <Polyline
+                    positions={path.map(node => [node.lat, node.lon])}
+                    color="blue"
+                />
+            )
+        }
+      </MapContainer>
+    </div>
+  );
 }
