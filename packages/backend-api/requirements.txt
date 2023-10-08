@@ -172,6 +172,7 @@ rfc3339-validator==0.1.4
 rfc3986-validator==0.1.1
 rpds-py==0.10.3
 rpm==4.18.1
+Rtree==1.0.1
 selinux==3.5
 Send2Trash==1.8.2
 sepolicy==3.5
