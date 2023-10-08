@@ -27,7 +27,6 @@ const markersData: MarkerData[] = [
 
 export const OSMMap: React.FC = () => {
   const markersRef = useRef<{[key: string]: any}>({});
-  const [path, setPath] = useState([]);
   const [routeFeatures, setRouteFeatures] = useState<any>(null);
   const [markersReady, setMarkersReady] = useState<boolean>(false);
 
@@ -37,17 +36,27 @@ export const OSMMap: React.FC = () => {
 
     try {
       const response = await fetch(`http://127.0.0.1:5000/api/find-path/${markerA.lat}/${markerA.lng}/${markerB.lat}/${markerB.lng}`);
+      
+      if (!response.ok) {
+        // La solicitud HTTP falló, extraer y mostrar el mensaje de error
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error}`);
+        return;
+      }
+      
       const data = await response.json();
-      setPath(data.path);
+      setRouteFeatures(data.path);      
+      
+  
 
     } catch (error) {
-      console.error("Error fetching the route data:", error);
+
+      alert("An error occurred while requesting data");
     }
   };
 
   const handleDragEnd = async (label: string) => {
     const latLng = markersRef.current[label].getLatLng();
-    console.log(`Latitud ${label}: ${latLng.lat}, Longitud ${label}: ${latLng.lng}`);
     await fetchRoute();
   };
 
@@ -82,12 +91,13 @@ export const OSMMap: React.FC = () => {
           </Marker>
         ))}
         {
-            path.length > 0 && (
+            routeFeatures && routeFeatures.map((route: any, index: number) => (  // Cambio aquí: iterando sobre routeFeatures y renderizando una Polyline para cada ruta
                 <Polyline
-                    positions={path.map(node => [node.lat, node.lon])}
+                    key={index}
+                    positions={route.nodes.map((node: any) => [node.lat, node.lon])}
                     color="blue"
                 />
-            )
+            ))
         }
       </MapContainer>
     </div>
