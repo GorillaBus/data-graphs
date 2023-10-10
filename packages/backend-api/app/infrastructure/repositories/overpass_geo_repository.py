@@ -1,13 +1,15 @@
 import requests
 from typing import Any, Dict, List, Tuple
 from app.domain.ports.geo_repository import IGeoRepository
-from app.infrastructure.dto.way_dto import WayDTO
+from app.domain.definitions.gis import TGisNode, TGisFeature
+
+OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 
 
 class OverPassGeoRepository(IGeoRepository):
 
-    def find_ways_in_radius(self, center_coords: Tuple[float, float], radius: float) -> List[WayDTO]:
-        overpass_url = "https://overpass-api.de/api/interpreter"
+    def find_ways_in_radius(self, center_coords: Tuple[float, float], radius: float) -> List[TGisFeature]:
+
         overpass_query = f"""
         [out:json];
         (
@@ -19,46 +21,50 @@ class OverPassGeoRepository(IGeoRepository):
         """.strip()
 
         try:
-            response = requests.get(overpass_url, params={
+            response = requests.get(OVERPASS_URL, params={
                                     'data': overpass_query})
             response.raise_for_status()
             response_data = response.json()
 
-            # Asegúrate de que encontraste 'elements' en la respuesta
+            # We are expecting 'elements'
             if 'elements' not in response_data:
-                print(
-                    'overpass: la respuesta no tiene el campo elements (respuesta inesperada)')
-                return []
+                raise ValueError(
+                    'overpass: la respuesta no tiene el campo elements (respuesta inesperada)')  # Usar damain error
 
             return self.__process_overpass_response__(response_data)
 
-        except requests.HTTPError:
+        except requests.HTTPError as e:
             print(
-                f"overpass: error HTTP {response.status_code if response else 'unknown'} al realizar la consulta: {response.text if response else 'unknown'}")
-        except ValueError:
-            print("overpass: error al decodificar la respuesta.")
+                f"overpass: error HTTP {e.response.status_code if e.response else 'unknown'} al realizar la consulta: {e.response.text if e.response else 'unknown'}")  # Usar damain error
+        except ValueError as ve:
+            # Usar damain error
+            print(f"overpass: error al decodificar la respuesta: {ve}")
         return []
 
-    def __process_overpass_response__(self, response: Dict[str, Any]) -> List[WayDTO]:
-        ways = []
-        nodes_cache = {}  # Un diccionario para almacenar los detalles de los nodos por ID
+    def __process_overpass_response__(self, response: Dict[str, Any]) -> List[TGisFeature]:
+        features = []
+        nodes_cache = {}
 
-        # Primero, procesa todos los nodos
+        # nodes
         for element in response['elements']:
             if element['type'] == 'node':
                 nodes_cache[element['id']] = {
-                    "lat": element['lat'], "lon": element['lon']}
+                    "id": element['id'],
+                    "lat": element['lat'],
+                    "lon": element['lon']
+                }
 
-        # Luego, procesa los caminos (ways)
+        # features
         for element in response['elements']:
             if element['type'] == 'way':
-                nodes = [nodes_cache[node_id]
-                         for node_id in element['nodes'] if node_id in nodes_cache]
-                way = WayDTO(
-                    id=element['id'],
-                    nodes=nodes,
-                    tags=element.get('tags')
-                )
-                ways.append(way)
+                nodes = [nodes_cache.get(node_id, {})
+                         for node_id in element['nodes']]
 
-        return ways
+                way: TGisFeature = {
+                    "id": element['id'],
+                    "nodes": nodes,
+                    "tags": element.get('tags', {})
+                }
+                features.append(way)
+
+        return features
