@@ -1,25 +1,20 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
-from networkx.algorithms.shortest_paths.astar import astar_path
+from typing import List, Tuple, Optional
+from app.domain.definitions.gis import TGisFeature, TNodeData, TNodeID
+
+TEdge = Tuple[TNodeID, TNodeID]
 
 
 class IGraph(ABC):
+
     @abstractmethod
-    def add_node(self, id: int, lat: float, lon: float):
+    def add_node(self, id: TNodeID, node_data: Optional[TNodeData] = None):
         pass
 
     @abstractmethod
-    def add_edge(self, node1_id: int, node2_id: int, weight: float):
+    def add_edge(self, node1_id: TNodeID, node2_id: TNodeID, weight: Optional[float] = None):
         pass
 
     @abstractmethod
-    def get_node_coordinates(self, node_id: int) -> Tuple[float, float]:
-        pass
-
-    @abstractmethod
-    def get_neighbors(self, node_id: int) -> List[Tuple[int, float]]:
-        pass
-
-    @abstractmethod
-    def create_graph(self, node_id: int) -> 'IGraph':
+    def find_shortest_path(self, node1_id: TNodeID, node2_id: TNodeID) -> TGisFeature:
         pass
