@@ -2,6 +2,9 @@ from typing import List
 from dataclasses import dataclass, asdict
 from typing import Dict, List, Union, Optional, Any
 
+TNodeData = Dict[str, Any]
+TNodeID = int
+
 
 @dataclass
 class TGisNode():
