@@ -1,27 +1,32 @@
-from typing import List, Tuple
-from app.infrastructure.dto.node_dto import NodeDTO
-from networkx import Graph as NXGraph
+from typing import List, Tuple, Optional
+import networkx as nx
 from app.domain.ports.igraph import IGraph
+from app.domain.definitions.gis import TNodeData, TNodeID
 
 
 class NXGraph(IGraph):
     def __init__(self):
-        self.graph = NXGraph()
+        self.graph = nx.Graph()
 
-    def add_node(self, id: int, lat: float, lon: float):  # Removed @abstractmethod
-        self.graph.add_node(id, lat=lat, lon=lon)
+    def add_node(self, node_id: TNodeID, node_data: Optional[TNodeData] = None):
 
-    def add_edge(self, node1_id: int, node2_id: int, weight: float):  # Removed @abstractmethod
-        self.graph.add_edge(node1_id, node2_id, weight=weight)
+        if node_data is not None:
+            self.graph.add_node(node_id, **node_data)
+        else:
+            self.graph.add_node(node_id)
 
-    def get_neighbors(self, node_id: int) -> List[Tuple[int, float]]:
-        neighbors = [(neighbor, self.graph[node_id][neighbor].get('weight', 1.0))
-                     for neighbor in self.graph.neighbors(node_id)]
-        return neighbors
+    def add_edge(self, node1_id: TNodeID, node2_id: TNodeID, weight: Optional[float] = None):
+        if weight is not None:
+            self.graph.add_edge(node1_id, node2_id, weight=weight)
+        else:
+            self.graph.add_edge(node1_id, node2_id)
 
-    @classmethod
-    def create_graph(cls, nodes: List[NodeDTO]) -> 'NXGraph':
-        adapter = cls()
-        for node in nodes:
-            adapter.add_node(node.id, node.lat, node.lon)
-        return adapter
+    def find_shortest_path(self, node1_id: TNodeID, node2_id: TNodeID) -> List[TNodeData]:
+        shortest_path_ids = nx.shortest_path(
+            self.graph, source=node1_id, target=node2_id)
+
+        path_nodes = {}
+        for nodeId in shortest_path_ids:
+            path_nodes[nodeId] = self.graph.nodes[nodeId]
+
+        return path_nodes
