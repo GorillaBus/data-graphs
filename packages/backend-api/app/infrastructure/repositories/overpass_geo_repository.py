@@ -1,7 +1,7 @@
 import requests
 from typing import Any, Dict, List, Tuple
 from app.domain.ports.geo_repository import IGeoRepository
-from app.domain.definitions.gis import TGisNode, TGisFeature
+from app.domain.definitions.gis import TGisFeature
 
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 
