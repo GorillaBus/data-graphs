@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Tuple, Optional
 import networkx as nx
 from app.domain.ports.igraph import IGraph
 from app.domain.definitions.gis import TNodeData, TNodeID
