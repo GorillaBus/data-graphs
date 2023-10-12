@@ -5,7 +5,7 @@ source venv/bin/activate
 export PYTHONPATH=$(pwd):$PYTHONPATH
 
 # Run tests 
-pytest --color=yes --verbose --cov=app --cov-report=term-missing
+pytest -s --color=yes --verbose --cov=app --cov-report=term-missing
 
 # Desactiva el entorno virtual al finalizar
 deactivate
