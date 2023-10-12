@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Optional
-from app.domain.definitions.gis import TGisFeature, TNodeData, TNodeID
+from app.domain.definitions.gis import TNodeData, TNodeID
 
 TEdge = Tuple[TNodeID, TNodeID]
 
@@ -16,5 +16,9 @@ class IGraph(ABC):
         pass
 
     @abstractmethod
-    def find_shortest_path(self, node1_id: TNodeID, node2_id: TNodeID) -> TGisFeature:
+    def find_shortest_path(self, node1_id: TNodeID, node2_id: TNodeID) -> List[TNodeData]:
+        pass
+
+    @abstractmethod
+    def find_nearest_node(self, target_coords: Tuple[float, float]) -> TNodeID:
         pass

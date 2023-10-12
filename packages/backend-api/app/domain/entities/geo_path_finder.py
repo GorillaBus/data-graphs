@@ -1,3 +1,4 @@
+import time
 from geopy.distance import geodesic
 from typing import Type, Tuple, List, Any, Dict
 from app.domain.errors.error import Error
@@ -6,6 +7,19 @@ from app.domain.ports.geo_repository import IGeoRepository
 from app.domain.definitions.gis import TGisFeature, TNodeID
 
 MAX_DISTANCE = 2000
+
+
+def profile_method(method):
+    def timed(*args, **kw):
+        start_time = time.time()
+        result = method(*args, **kw)
+        end_time = time.time()
+
+        print(
+            f"{method.__name__} - Tiempo de ejecución: {end_time - start_time:.4f} segundos")
+        return result
+
+    return timed
 
 
 class GeoPathFinder:
@@ -29,8 +43,8 @@ class GeoPathFinder:
         graph = self.__create_graph_from_paths(found_paths)
 
         # find nearest nodes to the given pints (coords)
-        nearest_node_a = self.__find_nearest_node_in_graph(graph, point_a)
-        nearest_node_b = self.__find_nearest_node_in_graph(graph, point_b)
+        nearest_node_a = graph.find_nearest_node(point_a)
+        nearest_node_b = graph.find_nearest_node(point_b)
         shortest_path = graph.find_shortest_path(
             nearest_node_a, nearest_node_b)
 
@@ -75,3 +89,9 @@ class GeoPathFinder:
                 "No se pudo encontrar un nodo cercano a las coordenadas proporcionadas.")
 
         return nearest_node_id
+
+
+# Aplicar el decorador a todos los métodos de la clase
+for method_name, method in vars(GeoPathFinder).items():
+    if callable(method):
+        setattr(GeoPathFinder, method_name, profile_method(method))
