@@ -64,6 +64,7 @@ gpg==1.17.1
 humanize==3.13.1
 idna==3.4
 iniconfig==2.0.0
+install==1.3.5
 ipykernel==6.25.2
 ipython==8.16.1
 ipython-genutils==0.2.0
@@ -72,6 +73,7 @@ isoduration==20.11.0
 itsdangerous==2.1.2
 jedi==0.19.1
 Jinja2==3.1.2
+joblib==1.3.2
 json5==0.9.14
 jsonpointer==2.4
 jsonschema==4.19.1
@@ -173,6 +175,8 @@ rfc3986-validator==0.1.1
 rpds-py==0.10.3
 rpm==4.18.1
 Rtree==1.0.1
+scikit-learn==1.3.1
+scipy==1.11.3
 selinux==3.5
 Send2Trash==1.8.2
 sepolicy==3.5
@@ -182,6 +186,7 @@ shapely==2.0.1
 simpleaudio==1.0.4
 simpleline==1.9.0
 six==1.16.0
+sklearn==0.0.post10
 sniffio==1.3.0
 sos==4.5.1
 soupsieve==2.4.1
@@ -192,6 +197,7 @@ termcolor==2.3.0
 terminado==0.17.1
 terminator==2.1.3
 texttable==1.6.4
+threadpoolctl==3.2.0
 tinycss2==1.2.1
 tornado==6.3.3
 traitlets==5.11.2
