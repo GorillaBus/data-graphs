@@ -13,7 +13,6 @@ class TGisNode():
     lat: float
     lon: float
     tags: Optional[Dict[str, Union[str, int, float]]] = None
-    nodes: Optional[List['TGisNode']] = None
 
     def to_dict(self) -> dict:
         return asdict(self)
