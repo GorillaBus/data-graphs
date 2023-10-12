@@ -6,7 +6,10 @@ ERROR_CODES = {
     },
     'INVALID_DISTANCE': {
         'code': 4002,
-        'description': "The distance between points A and B is invalid."
+        'description': "The distance between points is invalid."
     },
-
+    'NO_PATH': {
+        'code': 4003,
+        'description': "No available path between points."
+    }
 }
