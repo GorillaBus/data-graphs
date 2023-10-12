@@ -41,10 +41,15 @@ class NXGeoGraph(NXGraph, IGeoGraph):
                 "NXGeoGraph (index_node): node {node_id} could not be indexed due to null coordinates")
 
     def find_shortest_path(self, node1_id: TNodeID, node2_id: TNodeID) -> List[TNodeData]:
-        path = nx.shortest_path(self.graph, source=node1_id, target=node2_id)
+        try:
+            path = nx.shortest_path(
+                self.graph, source=node1_id, target=node2_id)
 
-        output = []
-        for nodeId in path:
-            output.append(self.graph.nodes[nodeId])
+            output = []
+            for nodeId in path:
+                output.append(self.graph.nodes[nodeId])
 
-        return output
+            return output
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return []

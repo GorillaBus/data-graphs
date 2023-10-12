@@ -29,6 +29,8 @@ class FindPathController:
 
             if e.error_code == 4002:
                 api_error_message = "Whoa, that's a long journey, man! The cosmic law of MAX_DISTANCE has been breached."
+            else:
+                api_error_message = e.description
 
             error_response = {
                 "error": api_error_message

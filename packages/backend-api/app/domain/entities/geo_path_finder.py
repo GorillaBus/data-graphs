@@ -35,6 +35,9 @@ class GeoPathFinder:
         shortest_path = graph.find_shortest_path(
             nearest_node_a, nearest_node_b)
 
+        if not shortest_path:
+            raise Error('NO_PATH')
+
         return shortest_path
 
     def __create_graph_from_paths(self, features: List[Dict[str, Any]]) -> IGeoGraph:
