@@ -71,8 +71,16 @@ export const OSMMap: React.FC = () => {
   }
 
   return (
-    <div>
-      <MapContainer className="map" center={defaultPosition} zoom={defaultPosition.zoom}>
+
+    <div style={{ height: "100vh", width: "100%" }}>
+      
+      <MapContainer
+        className="map"
+        center={defaultPosition}
+        zoom={defaultPosition.zoom}
+        style={{ height: "100%", width: "100%" }}
+      >
+
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
