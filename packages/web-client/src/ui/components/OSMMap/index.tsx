@@ -27,10 +27,10 @@ const markersData: MarkerData[] = [
 
 export const OSMMap: React.FC = () => {
   const markersRef = useRef<{[key: string]: any}>({});
-  const [routeFeatures, setRouteFeatures] = useState<any>(null);
+  const [areaFeatures, setAreaFeatures] = useState<any>(null);
   const [markersReady, setMarkersReady] = useState<boolean>(false);
 
-  const fetchRoute = async () => {
+  const fetchFeatures = async () => {
     const markerA = markersRef.current['A'].getLatLng();
     const markerB = markersRef.current['B'].getLatLng();
 
@@ -38,16 +38,14 @@ export const OSMMap: React.FC = () => {
       const response = await fetch(`http://127.0.0.1:5000/api/find-path/${markerA.lat}/${markerA.lng}/${markerB.lat}/${markerB.lng}`);
       
       if (!response.ok) {
-        // La solicitud HTTP falló, extraer y mostrar el mensaje de error
         const errorData = await response.json();
         alert(`Error: ${errorData.error}`);
         return;
       }
       
       const data = await response.json();
-      setRouteFeatures(data.path);      
       
-  
+      setAreaFeatures(data.path);      
 
     } catch (error) {
 
@@ -56,13 +54,12 @@ export const OSMMap: React.FC = () => {
   };
 
   const handleDragEnd = async (label: string) => {
-    const latLng = markersRef.current[label].getLatLng();
-    await fetchRoute();
+    await fetchFeatures();
   };
 
   useEffect(() => {
     if (markersReady) {
-      fetchRoute();
+      fetchFeatures();
     }
   }, [markersReady]);
 
@@ -91,13 +88,12 @@ export const OSMMap: React.FC = () => {
           </Marker>
         ))}
         {
-            routeFeatures && routeFeatures.map((route: any, index: number) => (  // Cambio aquí: iterando sobre routeFeatures y renderizando una Polyline para cada ruta
+            areaFeatures &&
                 <Polyline
-                    key={index}
-                    positions={route.nodes.map((node: any) => [node.lat, node.lon])}
+                    key='path'
+                    positions={areaFeatures.map((node: any) => [node.lat, node.lon])}
                     color="blue"
                 />
-            ))
         }
       </MapContainer>
     </div>
