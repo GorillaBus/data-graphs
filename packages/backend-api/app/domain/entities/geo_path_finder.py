@@ -1,45 +1,77 @@
 from geopy.distance import geodesic
-from typing import Tuple, List
+from typing import Type, Tuple, List, Any, Dict
 from app.domain.errors.error import Error
+from app.domain.ports.igraph import IGraph
 from app.domain.ports.geo_repository import IGeoRepository
-from app.domain.ports.igis_graph import IGisGraph
-from app.domain.ports.ipath_finder import IPathFinder
-from app.infrastructure.dto.node_dto import NodeDTO
+from app.domain.definitions.gis import TGisFeature, TNodeID
 
-
-MAX_DISTANCE = 1200
+MAX_DISTANCE = 2000
 
 
 class GeoPathFinder:
-    def __init__(self, geo_repo: IGeoRepository, path_finder: IPathFinder, graph_class: IGisGraph):
+    def __init__(self, geo_repo: IGeoRepository, graph_class: Type[IGraph]):
         self.geo_repo = geo_repo
-        self.path_finder = path_finder
         self.graph_class = graph_class
 
-    def find_path(self, point_a: Tuple[float, float], point_b: Tuple[float, float]) -> List[NodeDTO]:
+    def find_path(self, point_a: Tuple[float, float], point_b: Tuple[float, float]) -> TGisFeature:
         # A-B distance
         distance = geodesic(point_a, point_b).meters
         if distance > MAX_DISTANCE:
             raise Error('INVALID_DISTANCE')
 
-        # Calcular el punto medio entre A y B
         midpoint = ((point_a[0] + point_b[0]) / 2,
                     (point_a[1] + point_b[1]) / 2)
 
-        # Calcular el radio del buffer
         buffer_radius = distance * 2
+        found_paths = self.geo_repo.find_ways_in_radius(
+            midpoint, buffer_radius)
 
-        # Get features
-        nodes = self.geo_repo.find_ways_in_radius(
-            midpoint, buffer_radius/2)
-        return nodes
-        # Create graph
-        featured_graph = self.graph_class.create_graph(nodes)
+        graph = self.__create_graph_from_paths(found_paths)
 
-        # Convertir coordenadas a IDs de nodo
-        start_node_id = featured_graph.get_closest_node(*point_a)
-        end_node_id = featured_graph.get_closest_node(*point_b)
+        # find nearest nodes to the given pints (coords)
+        nearest_node_a = self.__find_nearest_node_in_graph(graph, point_a)
+        nearest_node_b = self.__find_nearest_node_in_graph(graph, point_b)
+        shortest_path = graph.find_shortest_path(
+            nearest_node_a, nearest_node_b)
 
-        # Find and return the path
+        return shortest_path
 
-        return self.path_finder.find_path(featured_graph, start_node_id, end_node_id)
+    def __create_graph_from_paths(self, features: List[Dict[str, Any]]) -> IGraph:
+        graph = self.graph_class()
+
+        for feature_dict in features:
+            nodes_list = feature_dict.get('nodes', [])
+            for node_dict in nodes_list:
+                node_id = node_dict.get('id')
+                graph.add_node(node_id, node_dict)
+
+            for i in range(len(nodes_list) - 1):
+                node1_id = nodes_list[i]['id']
+                node2_id = nodes_list[i + 1]['id']
+                graph.add_edge(node1_id, node2_id)
+        return graph
+
+    def __find_nearest_node_in_graph(self, graph: IGraph, target_coords: Tuple[float, float]) -> TNodeID:
+        min_distance = float("inf")
+        nearest_node_id = None
+
+        for node_id, attributes in graph.graph.nodes(data=True):
+            node_lat = attributes.get('lat')
+            node_lon = attributes.get('lon')
+            if node_lat is None or node_lon is None:
+                continue
+
+            node_coords = (node_lat, node_lon)
+
+            distance = geodesic(target_coords, node_coords).meters
+
+            if distance < min_distance:
+                min_distance = distance
+                nearest_node_id = node_id
+
+        if nearest_node_id is None:
+            #!trhow domain error
+            raise ValueError(
+                "No se pudo encontrar un nodo cercano a las coordenadas proporcionadas.")
+
+        return nearest_node_id

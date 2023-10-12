@@ -1,16 +1,13 @@
 from flask import jsonify, make_response
 from app.domain.errors.error import Error
-from app.domain.entities.geo_path_finder import GeoPathFinder
 from app.application.use_cases.find_path_use_case import FindPathUseCase
 from app.infrastructure.repositories.overpass_geo_repository import OverPassGeoRepository
-from app.infrastructure.adapters.algos.astar_path_finder import AStarPathFinder
-from app.infrastructure.adapters.nx_gis_graph import NXGisGraph
+from app.infrastructure.adapters.nxgraph import NXGraph
 
 # Dependencies
-path_finder_algo = AStarPathFinder()
 geo_repo = OverPassGeoRepository()
-path_finder = GeoPathFinder(geo_repo, path_finder_algo, NXGisGraph)
-find_path_use_case = FindPathUseCase(path_finder)
+graph_class = NXGraph
+find_path_use_case = FindPathUseCase(geo_repo, graph_class)
 
 
 class FindPathController:
@@ -18,14 +15,15 @@ class FindPathController:
     def handle_request(lat_a: float, lon_a: float, lat_b: float, lon_b: float):
         try:
             # Run use-case
-            path_dto_list = find_path_use_case.execute(
+            found_path_way = find_path_use_case.execute(
                 lat_a, lon_a, lat_b, lon_b)
 
-            # Map DTO to response
-            path_json = [dto.to_dict() for dto in path_dto_list]
+            api_output_data = []
+            for [_, value] in found_path_way.items():
+                api_output_data.append(value)
 
             response = {
-                "path": path_json
+                "path": api_output_data
             }
             return jsonify(response)
 
