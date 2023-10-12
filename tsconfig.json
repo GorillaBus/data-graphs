@@ -9,6 +9,8 @@
       "resolveJsonModule": true,
       "forceConsistentCasingInFileNames": true,
       "baseUrl": ".",
-      "paths": {}
+      "paths": {
+        "@web-client/*": ["packages/web-client/src/*"]
+      }
     }
   }
