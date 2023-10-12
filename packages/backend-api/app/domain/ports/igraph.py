@@ -18,7 +18,3 @@ class IGraph(ABC):
     @abstractmethod
     def find_shortest_path(self, node1_id: TNodeID, node2_id: TNodeID) -> List[TNodeData]:
         pass
-
-    @abstractmethod
-    def find_nearest_node(self, target_coords: Tuple[float, float]) -> TNodeID:
-        pass
