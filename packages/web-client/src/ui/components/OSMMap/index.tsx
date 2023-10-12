@@ -15,7 +15,7 @@ L.Icon.Default.mergeOptions({
 const defaultPosition = {
   lat: -34.7833,
   lng: -58.4000,
-  zoom: 13
+  zoom: 17
 };
 
 type MarkerData = {
